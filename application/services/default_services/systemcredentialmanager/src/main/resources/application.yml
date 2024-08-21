@@ -1,0 +1,14 @@
+spring:
+    cloud:
+        vault:
+            scheme: http
+            host: ${VAULT_HOST:localhost}
+            port: 8200
+            token: ${VAULT_TOKEN}
+
+    data:
+        mongodb:
+            uri: ${MONGO_DB_URL}
+
+server:
+    port: 8005

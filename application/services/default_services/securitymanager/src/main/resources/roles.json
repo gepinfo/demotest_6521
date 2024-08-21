@@ -1,0 +1,5 @@
+[
+  { "role": "Admin" },
+  { "role": "Guest" },
+  { "role": "User" }
+]

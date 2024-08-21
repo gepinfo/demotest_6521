@@ -1,0 +1,276 @@
+<div id="iuzatd" class="gpd-container gpd-cnt">
+    <div id="iz6vo" class="gdp-row gpd-grid">
+        <div id="iqtvt" class="cell gpd-clm">
+            <div id="ighf" class="gdp-row gpd-grid sticky">
+                <div id="ik48" class="cell gpd-clm">
+                    <div id="icu6h" class="gpd-text">Vault Dashboard
+                    </div>
+                </div>
+            </div>
+            <div id="i937yi" class="gdp-row gpd-grid">
+                <div id="i5wn7j" class="cell gpd-clm">
+                    <div id="i8zcvg" class="gdp-row gpd-grid">
+                        <div id="il2xxf" class="cell gpd-clm">
+                            <div id="i4a9sf" class="gpd-text">Secure Administration
+                            </div>
+                        </div>
+                        <label>Click on Credential Key on Grid Table View the Data</label>
+                        <div name="grid_template-i7vq" id="template-i7vq">
+                            <ag-grid-angular #agGrid style="width: 100%; height: 100%;" id="myGrid"
+                                class="ag-theme-balham" [columnDefs]="columnDefs" [pagination]="true"
+                                [paginationPageSize]="paginationPageSize" [defaultColDef]="defaultColDef"
+                                [rowData]="rowData" [rowSelection]="rowSelection" (gridReady)="onGridReady($event)"
+                                domLayout='autoHeight' (click)="onSelectionChanged($event)"></ag-grid-angular>
+                            <button id="create_vault" class="btn btn-success"
+                                (click)="createInternpopup()">create</button>
+                            <nz-modal [(nzVisible)]="popupInternal" nzTitle="The first Modal"
+                                (nzOnCancel)="handleCancel()" (nzOnOk)="createVault()">
+                                <ng-container *nzModalContent>
+                                    <div id="template-ijat" class="gjs-row">
+                                        <div id="template-i1ns" class="gjs-cell">
+                                            <label>Enter the Credentail Path: </label>
+                                        </div>
+                                        <div id="template-i02f" class="gjs-cell">
+                                            <input class="input form-control" type="text" [(ngModel)]="internalPath"
+                                                placeholder="please add Credentials path ex:test"
+                                                [ngModelOptions]="{standalone: true}">
+                                        </div>
+                                    </div>
+                                    <div id="template-iqnl" class="gjs-row">
+                                        <div id="template-ihud" class="gjs-cell">
+                                            <label>Enter the Credentail: </label>
+                                            <label>Please enter the JSON Object textarea box field data</label>
+                                        </div>
+                                        <div id="template-i7xj" class="gjs-cell">
+                                            <textarea class="textarea" [(ngModel)]="internalPathObj"></textarea>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                            </nz-modal>
+                        </div>
+                    </div>
+
+                    <nz-list [nzDataSource]="data" [nzRenderItem]="item" [nzItemLayout]="'horizontal'">
+                        <ng-template #item let-item>
+                            <nz-list-item class="listitem" [nzActions]="[viewAction]">
+                                <span *ngIf="item.name == 'External'">
+                                    <button class="fa fa-external-link btn" style="cursor: pointer;"
+                                        (click)="openModal()" *ngIf="externalLink != null"></button>
+                                    <button class="fa fa-pencil btn" style="cursor: pointer;" (click)="UpdateModel()"
+                                        *ngIf="externalLink != null"></button>
+                                    <button class="fa fa-trash btn" style="cursor: pointer;" (click)="DeleteData()"
+                                        *ngIf="externalLink != null"></button>
+                                </span>
+                                <ng-template #viewAction>
+                                    <a class="actions" (click)="open(item.name)">View {{item.name}}</a>
+                                </ng-template>
+                                <nz-list-item-meta [nzTitle]="nzTitle" nzAvatar={{item.image}}
+                                    nzDescription={{item.description}}>
+                                    <ng-template #nzTitle>
+                                        <a href="https://ng.ant.design">{{ item.name }}</a>
+                                    </ng-template>
+                                </nz-list-item-meta>
+                            </nz-list-item>
+                        </ng-template>
+                    </nz-list>
+
+                    <!-- internal component tags -->
+                    <nz-drawer *ngIf="internal" [nzVisible]="visible" [nzClosable]="false" [nzFooter]="footerTpl"
+                        nzTitle="View Internal" [nzBodyStyle]="{ overflow: 'auto' }" [nzWidth]="620"
+                        (nzOnClose)="close()">
+                        <ng-container *nzDrawerContent>
+                            <div id="template-ijat" class="gjs-row">
+                                <div id="template-i1ns" class="gjs-cell">
+                                    <label>Enter the Credentail Path: </label>
+                                </div>
+                                <div id="template-i02f" class="gjs-cell">
+                                    <input class="input form-control" type="text" [(ngModel)]="internalPath"
+                                        placeholder="please add Credentials path ex:test"
+                                        [ngModelOptions]="{standalone: true}">
+                                </div>
+                            </div>
+                            <div id="template-iqnl" class="gjs-row">
+                                <div id="template-ihud" class="gjs-cell">
+                                    <label>Enter the Credentail: </label>
+                                    <label>Please enter the JSON Object textarea box field data</label>
+                                </div>
+                                <div id="template-i7xj" class="gjs-cell">
+                                    <textarea class="textarea" [(ngModel)]="internalPathObj"></textarea>
+                                </div>
+                            </div>
+                        </ng-container>
+                        <ng-template #footerTpl>
+                            <div style="float: right">
+                                <button [disabled]="internalvalue" nz-button style="margin-right: 8px;" (click)="updateByVaultName()"
+                                    nzType="primary">Update</button>
+                                <button [disabled]="internalvalue" nz-button style="margin-right: 8px;" (click)="deleteByVaultId()"
+                                    nzType="primary">Delete</button>
+                                <button nz-button style="margin-right: 8px;" (click)="close()">Cancel</button>
+
+                            </div>
+                        </ng-template>
+                    </nz-drawer>
+
+                    <!-- external component tags -->
+                    <nz-drawer *ngIf="external" [nzVisible]="visible" [nzWidth]="640" [nzClosable]="false"
+                        [nzFooter]="footerTpl" nzTitle="View External" (nzOnClose)="close()">
+                        <ng-container *nzDrawerContent>
+                            <form [formGroup]="createProject">
+                                <div class="row mt-4">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>IP Address</label>
+                                            <input type="text" [(ngModel)]="externalVault.ipaddress"
+                                                [ngModelOptions]="{standalone: true}" name="ipaddress"
+                                                class="form-control mt-2">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Port Number</label>
+                                            <input type="text" [(ngModel)]="externalVault.portnumber"
+                                                [ngModelOptions]="{standalone: true}" name="portnumber"
+                                                class="form-control mt-2">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-4">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>UserName</label>
+                                            <input type="text" [(ngModel)]="externalVault.username"
+                                                [ngModelOptions]="{standalone: true}" name="username"
+                                                class="form-control mt-2">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Password</label>
+                                            <input type="password" [(ngModel)]="externalVault.password"
+                                                [ngModelOptions]="{standalone: true}"
+                                                [type]="show ? 'text' : 'password'" pw-show-hide="icon" name="password"
+                                                class="form-control center">
+                                            <div class="input-group-append align-right">
+                                                <img [src]="show ? '../../assets/img/eyeopen.png' : '../../assets/img/eyeslash.png'"
+                                                    height="20" (click)="hideEye()" alt="eye" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-4">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Version</label>
+                                            <input type="text" [(ngModel)]="externalVault.version"
+                                                [ngModelOptions]="{standalone: true}" name="version"
+                                                class="form-control mt-2">
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <span>
+                                <button class="fa fa-pencil btn" style="cursor: pointer;" (click)="UpdateModel()"
+                                    *ngIf="externalLink != null"></button>
+                                <button class="fa fa-trash btn" style="cursor: pointer;" (click)="DeleteData()"
+                                    *ngIf="externalLink != null"></button>
+                            </span>
+                        </ng-container>
+                        <ng-template #footerTpl>
+                            <div style="float: right">
+                                <button id="create_btn" class="btn btn-success" (click)="storeExternalVault()"
+                                    *ngIf="externalLink == null || ''">create</button>
+                                <button id="create_btn" class="btn btn-success" (click)="UpdateData()"
+                                    *ngIf="externalLink">update</button>
+                                <button id="cancel_btn" class="btn btn-success" (click)="close()">Cancel</button>
+                            </div>
+                        </ng-template>
+                    </nz-drawer>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- popupmodel -->
+<div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':displayModel}">
+    <div class="modal-dialog modal-lg" role="dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="container p-5" style="background-color:#f7f6f6">
+                    <form [formGroup]="createProject">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <img id="close_btn" (click)="onCloseHandled()" src="../../assets/img/close.png" alt="">
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>IP Address</label>
+                                    <input type="text" [(ngModel)]="externalVault.ipaddress"
+                                        placeholder="Please enter istead of http or https://"
+                                        [ngModelOptions]="{standalone: true}" name="ipaddress"
+                                        class="form-control mt-2">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Port Number</label>
+                                    <input type="text" [(ngModel)]="externalVault.portnumber"
+                                        placeholder="Please enter port" [ngModelOptions]="{standalone: true}"
+                                        name="portnumber" class="form-control mt-2">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>UserName</label>
+                                    <input type="text" [(ngModel)]="externalVault.username"
+                                        [ngModelOptions]="{standalone: true}" name="username" class="form-control mt-2">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Password</label>
+                                    <input type="password" [(ngModel)]="externalVault.password"
+                                        [ngModelOptions]="{standalone: true}" [type]="show ? 'text' : 'password'"
+                                        pw-show-hide="icon" name="password" class="form-control center">
+                                    <div class="input-group-append align-right">
+                                        <img [src]="show ? '../../assets/img/eyeopen.png' : '../../assets/img/eyeslash.png'"
+                                            height="20" (click)="hideEye()" alt="eye" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Version</label>
+                                    <input type="text" [(ngModel)]="externalVault.version"
+                                        [ngModelOptions]="{standalone: true}" name="version" class="form-control mt-2">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="container">
+                        <div class="row mt-4">
+                            <div class="d-flex justify-content-center">
+                                <div class="p-2 mt-4">
+                                    <button id="create_btn" class="btn btn-success" (click)="storeExternalVault()"
+                                        *ngIf="externalLink == null || ''">create</button>
+                                    <button id="create_btn" class="btn btn-success" (click)="UpdateData()"
+                                        *ngIf="externalLink">update</button>
+                                </div>
+                                <div class="p-2 mt-4">
+                                    <button id="cancel_btn" class="btn btn-success"
+                                        (click)="onCloseHandled()">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,17 @@
+server:
+  port: 3015
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGO_DB_URL}
+
+storage:
+  type:GCS
+
+# GCS Configuration
+gcs:
+  bucket-name: storage-box
+  credentials:
+    location: file:/home/dorustree/Documents/interstellar-403806-1874479b5980.json
+

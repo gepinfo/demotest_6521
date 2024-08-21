@@ -1,0 +1,293 @@
+name: aws_ec2_deployments_for_demotest
+on:
+  push:
+    branches: 
+      - main
+  pull_request:
+    branches: 
+      - main
+env:
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  AWS_ROLE_FOR_FARGATE: ${{  secrets.AWS_ROLE_FOR_FARGATE  }}
+  AWS_ACCESS_KEY_ID: ${{  secrets.AWS_ACCESS_KEY_ID  }}
+  AWS_SECRET_ACCESS_KEY: ${{  secrets.AWS_SECRET_ACCESS_KEY  }}
+  AWS_REGION: ${{  secrets.AWS_REGION  }}
+  AWS_VPC_SUBNET: ${{  secrets.AWS_VPC_SUBNET  }}
+  AWS_VPC_SECURITY_GROUP: ${{  secrets.AWS_VPC_SECURITY_GROUP  }}
+  AWS_ECS_CLUSTER_NAME: ${{  secrets.AWS_ECS_CLUSTER_NAME  }}
+  SERVICE_DISCOVERY_NAMESPACE: ${{  secrets.SERVICE_DISCOVERY_NAME  }}
+  PROJECT_NAME: demotest-6521
+  AWS_S3_BUCKET_NAME: demotest-6521.geppetto.link
+
+jobs:
+  Prerequisites:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure the aws cli
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{  env.AWS_ACCESS_KEY_ID  }}
+          aws-secret-access-key: ${{  env.AWS_SECRET_ACCESS_KEY  }}
+          aws-region: ${{  env.AWS_REGION  }}
+      - name: Creating the S3 bucket
+        run: |
+          aws s3api create-bucket --bucket ${{ env.AWS_S3_BUCKET_NAME }} --region us-east-1
+          aws s3api put-bucket-tagging --bucket ${{ env.AWS_S3_BUCKET_NAME }} --tagging 'TagSet=[{Key=project_name,Value=${{ env.PROJECT_NAME }} },{Key=name,Value=${{ env.PROJECT_NAME }} }]'
+      - name: Creating the aws ECR for each micro service
+        run: |
+          aws ecr create-repository --repository-name geppetto-generatedcode-demotest-6521-apigateway --tags Key=project_name,Value=${{ env.PROJECT_NAME }} Key=name,Value=${{ env.PROJECT_NAME }} --region us-east-1
+          aws ecr create-repository --repository-name geppetto-generatedcode-demotest-6521-authproxy --tags Key=project_name,Value=${{ env.PROJECT_NAME }} Key=name,Value=${{ env.PROJECT_NAME }} --region us-east-1
+          aws ecr create-repository --repository-name geppetto-generatedcode-demotest-6521-securitymanager --tags Key=project_name,Value=${{ env.PROJECT_NAME }} Key=name,Value=${{ env.PROJECT_NAME }} --region us-east-1
+          aws ecr create-repository --repository-name geppetto-generatedcode-demotest-6521-systemcredentialmanager --tags Key=project_name,Value=${{ env.PROJECT_NAME }} Key=name,Value=${{ env.PROJECT_NAME }} --region us-east-1
+          aws ecr create-repository --repository-name geppetto-generatedcode-demotest-6521-gcam --tags Key=project_name,Value=${{ env.PROJECT_NAME }} Key=name,Value=${{ env.PROJECT_NAME }} --region us-east-1
+          aws ecr create-repository --repository-name geppetto-generatedcode-demotest-6521-gepfilemanager --tags Key=project_name,Value=${{ env.PROJECT_NAME }} Key=name,Value=${{ env.PROJECT_NAME }} --region us-east-1
+          aws ecr create-repository --repository-name geppetto-generatedcode-demotest-6521-fluentd --tags Key=project_name,Value=${{ env.PROJECT_NAME }} Key=name,Value=${{ env.PROJECT_NAME }} --region us-east-1
+          aws ecr create-repository --repository-name geppetto-generatedcode-demotest-6521-systementry --tags Key=project_name,Value=${{ env.PROJECT_NAME }} Key=name,Value=${{ env.PROJECT_NAME }} --region us-east-1
+          aws ecr create-repository --repository-name geppetto-generatedcode-demotest-6521-employee --tags Key=project_name,Value=${{ env.PROJECT_NAME }} Key=name,Value=${{ env.PROJECT_NAME }} --region us-east-1
+  Build_and_upload_docker_images_to_ECR:
+    needs: Prerequisites
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure the aws cli
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{  env.AWS_ACCESS_KEY_ID  }}
+          aws-secret-access-key: ${{  env.AWS_SECRET_ACCESS_KEY  }}
+          aws-region: ${{  env.AWS_REGION  }}
+      - name: Checkout_Repo
+        uses: actions/checkout@v2
+      - name: Login to AWS ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{  steps.login-ecr.outputs.registry  }}
+          IMAGE_TAG: latest
+        run: |
+     
+          cd application/services/default_services/authproxy
+          docker build -t $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-authproxy:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-authproxy:$IMAGE_TAG
+          echo "Successfully build the docker image for authproxy  and pushed to aws ecr"
+
+          cd ../securitymanager
+          docker build -t $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-securitymanager:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-securitymanager:$IMAGE_TAG
+          echo "Successfully build the  docker image for securitymanager and pushed to aws ecr"
+
+          cd ../systemcredentialmanager
+          docker build -t $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-systemcredentialmanager:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-systemcredentialmanager:$IMAGE_TAG
+          echo "Successfully build the  docker image for systemcredentialmanager and pushed to aws ecr"
+          
+          cd ../gcam
+          docker build -t $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-gcam:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-gcam:$IMAGE_TAG
+          echo "Successfully build the docker image for gcam  and pushed to aws ecr"
+
+          cd ../gepfilemanager
+          docker build -t $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-gepfilemanager:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-gepfilemanager:$IMAGE_TAG
+          echo "Successfully build the  docker image for gepfilemanager and pushed to aws ecr"
+
+          cd ../fluentd/fluend
+          docker build -t $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-fluentd:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-fluentd:$IMAGE_TAG
+          echo "Successfully build the  docker image for fluentd and pushed to aws ecr"
+
+          cd ../../../custom_services/apigateway
+          docker build -t $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-apigateway:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-apigateway:$IMAGE_TAG
+          echo "Successfully build the docker image for apigateway and pushed to aws ecr"
+
+          cd ../systementry
+          docker build -t $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-systementry:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-systementry:$IMAGE_TAG
+          echo "Successfully build the docker image for systementry and pushed to aws ecr"
+          cd ../employee
+          docker build -t $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-employee:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/geppetto-generatedcode-demotest-6521-employee:$IMAGE_TAG
+          echo "Successfully build the docker image for employee and pushed to aws ecr"
+     
+  Deploy_backend:
+    needs: Build_and_upload_docker_images_to_ECR
+    runs-on: ubuntu-latest
+    outputs:
+        public_ip: ${{  steps.networkInterfaceId.outputs.PUBLIC_IP_ADDRESS  }}
+    steps:
+      - name: Check the  branch
+        uses: actions/checkout@v2
+      - name: Installing the Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10
+      - name: EFS volume attach task definition
+        id: EfsID
+        run: echo "::set-output name=FILESYSTEM_ID::$(aws efs create-file-system --performance-mode generalPurpose --throughput-mode bursting --encrypted --tags Key=Name,Value=${{ env.PROJECT_NAME }}  Key=project_name,Value=${{ env.PROJECT_NAME }}  | jq '.FileSystemId')"
+      - name: EFS SecurityGroups Added
+        run: |
+          sleep 40s
+          aws efs create-mount-target --file-system-id ${{ steps.EfsID.outputs.FILESYSTEM_ID }} --subnet-id ${{ env.AWS_VPC_SUBNET }} --security-group ${{ env.AWS_VPC_SECURITY_GROUP }}
+      - name: Convert the task_definition.ts to json
+        working-directory: .github/workflows
+        run: |
+          AWS_ACCOUNT_ID="${{ env.AWS_ACCOUNT_ID }}" AWS_ROLE_FOR_FARGATE="${{ env.AWS_ROLE_FOR_FARGATE }}" EFS_ID="${{ steps.EfsID.outputs.FILESYSTEM_ID }}" node task-definition.ts >> task-definition.json
+          AWS_ACCOUNT_ID0="${{ env.AWS_ACCOUNT_ID }}" AWS_ROLE_FOR_FARGATE="${{ env.AWS_ROLE_FOR_FARGATE }}" EFS_ID="${{ steps.EfsID.outputs.FILESYSTEM_ID }}" node task-definition_0.ts >> task-definition_0.json
+      #------------- AWS Credentials Configuration ----------------#
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{  env.AWS_ACCESS_KEY_ID  }}
+          aws-secret-access-key: ${{  env.AWS_SECRET_ACCESS_KEY  }}
+          aws-region: ${{  env.AWS_REGION  }}
+      
+      #------------- Service Discovery ----------------#
+      - name: Create Service Discovery 
+        id: SD_ARN
+        run: |
+
+          echo "::set-output name=SD_ARN::$(aws servicediscovery create-service --name demotest --namespace-id ${{ env.SERVICE_DISCOVERY_NAMESPACE }}   --dns-config "NamespaceId=${{ env.SERVICE_DISCOVERY_NAMESPACE }} ,RoutingPolicy=MULTIVALUE,DnsRecords=[{Type=A,TTL=60}]" --description "Service discovery for ${{ env.PROJECT_NAME }} project" --tags Key=project_name,Value=${{ env.PROJECT_NAME }} Key=name,Value=${{ env.PROJECT_NAME }} | jq -r '.Service.Arn')"
+          echo "::set-output name=SD_ARN0::$(aws servicediscovery create-service --name demotest0 --namespace-id ${{ env.SERVICE_DISCOVERY_NAMESPACE }}   --dns-config "NamespaceId=${{ env.SERVICE_DISCOVERY_NAMESPACE }} ,RoutingPolicy=MULTIVALUE,DnsRecords=[{Type=A,TTL=60}]" --description "Service discovery for ${{ env.PROJECT_NAME }} project" --tags Key=project_name,Value=${{ env.PROJECT_NAME }} Key=name,Value=${{ env.PROJECT_NAME }} | jq -r '.Service.Arn')"
+      #------------- Amazon ECS task definition each file ----------------#
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: .github/workflows/task-definition.json
+          container-name: mongo-6521
+          image: geppettotest/mongo-local:april2020
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          cluster: ${{  env.AWS_ECS_CLUSTER_NAME  }}
+          wait-for-service-stability: true
+
+      #------------- Amazon ECS task definition split ten microservices ----------------#
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def0
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: .github/workflows/task-definition_0.json
+          container-name: employee-6521
+          image: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/geppetto-generatedcode-demotest-6521-employee:latest
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def0.outputs.task-definition }}
+          cluster: ${{  env.AWS_ECS_CLUSTER_NAME  }}
+          wait-for-service-stability: true
+      
+      #------------- Amazon ECS task definition connect servicediscovery ----------------#
+      - name: Deploying ECS task definition with Service
+        run: |
+          aws ecs create-service --cluster ${{  env.AWS_ECS_CLUSTER_NAME  }} --service-name demotest --task-definition demotest --desired-count 1 --launch-type FARGATE --platform-version LATEST --network-configuration "awsvpcConfiguration={subnets=[${{ env.AWS_VPC_SUBNET }}],securityGroups=[${{ env.AWS_VPC_SECURITY_GROUP }}],assignPublicIp=ENABLED}" --service-registries '{"registryArn":"${{ steps.SD_ARN.outputs.SD_ARN }}"}' --tags key=project_name,value=${{ env.PROJECT_NAME }}
+          sleep 60s
+          aws ecs create-service --cluster ${{  env.AWS_ECS_CLUSTER_NAME  }} --service-name demotest0 --task-definition demotest0 --desired-count 1 --launch-type FARGATE --platform-version LATEST --network-configuration "awsvpcConfiguration={subnets=[${{ env.AWS_VPC_SUBNET }}],securityGroups=[${{ env.AWS_VPC_SECURITY_GROUP }}],assignPublicIp=ENABLED}" --service-registries '{"registryArn":"${{ steps.SD_ARN.outputs.SD_ARN0 }}"}' --tags key=project_name,value=${{ env.PROJECT_NAME }}
+          sleep 20s
+
+      - name: Get ECS Task IP Address
+        id: networkInterfaceId
+        run: |
+          sleep 60s
+          task_arn=$(aws ecs list-tasks --cluster  ${{ env.AWS_ECS_CLUSTER_NAME }} --service-name demotest  | awk '/${{ env.AWS_ECS_CLUSTER_NAME }}/ {print}' | sed 's/,$//' | awk '{ sub(/^[ \t]+/, ""); print }' | awk '{printf "%s ",$0} END {print ""}')
+          str="${task_arn:1:-1}"
+          sleep 20s
+          modified_task_arn="${str%?}"
+          ENI=$(aws ecs describe-tasks --cluster ${{ env.AWS_ECS_CLUSTER_NAME }} --tasks $modified_task_arn | jq '.tasks[].attachments[].details[1].value')
+          sleep 5s
+          echo $ENI
+          Modified_ENI="${ENI:1:-1}"
+          echo $Modified_ENI
+          sleep 20s
+          echo "::set-output name=PUBLIC_IP_ADDRESS::$(aws ec2 describe-network-interfaces --network-interface-ids $Modified_ENI | jq -r '.NetworkInterfaces[].PrivateIpAddresses[].Association.PublicIp')"
+
+
+#      - name: Run the ECS task definition
+#        id: networkInterfaceId
+#        run: |
+#          echo "::set-output name=run_task::$(aws ecs run-task --capacity-provider-strategy capacityProvider=FARGATE_SPOT --cluster ${{  env.AWS_ECS_CLUSTER_NAME  }}  --task-definition demotest  --network-configuration "awsvpcConfiguration={subnets=[${{  env.AWS_VPC_SUBNET  }}],securityGroups=[${{  env.AWS_VPC_SECURITY_GROUP  }}],assignPublicIp=ENABLED}" | jq  -r '.tasks[].taskArn')"
+#          sleep 20s
+#      - uses: jungwinter/split@v1
+#        id: split
+#        with:
+#          msg: ${{ steps.networkInterfaceId.outputs.run_task }}
+#          seperator: '/'
+#          max limit: -1
+#      - name: network describe ENI IDS
+#       id: eniIds
+#        run : |
+#          echo "::set-output name=NETWORK_ID::$(aws ecs describe-tasks --cluster ${{  env.AWS_ECS_CLUSTER_NAME  }} --tasks ${{ steps.split.outputs._2 }} | jq '.tasks[].attachments[].details[1].value')"
+#      - name: network describe pulblicIp
+#        id: publicIpAddress
+#        run : |
+#          echo "::set-output name=PUBLIC_IP_ADDRESS::$(aws ec2 describe-network-interfaces --network-interface-ids ${{  steps.eniIds.outputs.NETWORK_ID  }}  | jq -r '.NetworkInterfaces[].PrivateIpAddresses[].Association.PublicIp')"
+      - name: describe value on check variable
+        run : |
+          echo ${{ steps.split.outputs._2 }}
+          echo ${{ steps.eniIds.outputs.NETWORK_ID }}
+          echo ${{ steps.publicIpAddress.outputs.PUBLIC_IP_ADDRESS }}
+  Upload_S3_Bucket:
+    needs: Deploy_backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v2
+      - name: Install the node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.17  
+      - name: Installing angular/cli
+        run: npm install -g @angular/cli
+      - name: Installing the node modules
+        working-directory: ./application/client/web/demotest
+        run: |
+          npm install
+          npm i @ng-select/ng-select
+      - name: Link the backend apigateway
+        working-directory: ./application/client/web/demotest/src/environments
+        run: |
+          rm -rf environment.prod.ts
+          echo 'export const environment = { WEB_API: `http://${{  needs.Deploy_backend.outputs.public_ip  }}:8000/web`, MOBILE_API: `/api/mobile`, UPLOAD_API: `http://${{  needs.Deploy_backend.outputs.public_ip  }}:3015`, production: false };' >> environment.prod.ts
+      - name: Production build
+        working-directory: ./application/client/web/demotest
+        run: ng build
+      - uses: jakejarvis/s3-sync-action@v0.5.1
+        with:
+          args: --acl public-read --delete
+        env:
+          AWS_S3_BUCKET: ${{  env.AWS_S3_BUCKET_NAME  }}
+          AWS_ACCESS_KEY_ID: ${{  env.AWS_ACCESS_KEY_ID  }}
+          AWS_SECRET_ACCESS_KEY: ${{  env.AWS_SECRET_ACCESS_KEY  }}
+          AWS_REGION: ${{  env.AWS_REGION  }}
+          SOURCE_DIR: "application/client/web/demotest/dist/demotest"
+      - name: Enable the static webhosting
+        run: |
+          aws s3 website s3://${{ env.AWS_S3_BUCKET_NAME }}/ --index-document index.html --error-document index.html
+          aws s3api put-bucket-policy --bucket ${{ env.AWS_S3_BUCKET_NAME }} --policy '{ "Version": "2012-10-17","Statement": [{ "Sid": "PublicReadGetObject", "Effect": "Allow", "Principal": "*", "Action": "s3:GetObject", "Resource": "arn:aws:s3:::${{ env.AWS_S3_BUCKET_NAME }}/*"}]}'
+  Route53_geppetto_link:
+    needs: Upload_S3_Bucket
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Create an A record set"
+        uses: Roosterfish/aws-route53-record-set-action@master
+        with: 
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_route53_hosted_zone_id: ${{ secrets.AWS_ROUTE53_HOSTED_ZONE_ID }}
+          aws_route53_rr_action: "CREATE"
+          aws_route53_rr_name: "demotest-6521.geppetto.link"
+          aws_route53_rr_type: "CNAME"
+          aws_route53_rr_ttl: "300"
+          aws_route53_rr_value: "demotest-6521.geppetto.link.s3-website-us-east-1.amazonaws.com."
+  Mongodb_Script_Upload:
+    needs: [ Route53_geppetto_link, Deploy_backend ]
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v2
+        with: 
+          path: './'
+      - name: Take time to Mongodb_Script_Upload
+        run: |
+          sleep 120s
+          mongo ${{ needs.Deploy_backend.outputs.public_ip }}:27017/demotest_6521 -u admin -p password --authenticationDatabase admin < devops/local/docker/mongo.js

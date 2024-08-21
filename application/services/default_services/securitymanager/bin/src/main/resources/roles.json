@@ -1,0 +1,6 @@
+[
+  { "role": "Admin" },
+  { "role": "Guest" },
+  { "role": "User" },
+  { "role" : "Developer"}
+]

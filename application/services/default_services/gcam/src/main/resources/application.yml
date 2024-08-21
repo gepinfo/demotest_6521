@@ -1,0 +1,13 @@
+spring:
+  data:
+    mongodb:
+      uri: ${MONGO_DB_URL}
+
+server:
+  port: ${SERVER_PORT:8007}
+
+localsystementryBaseUrl: http://localhost
+localgeneratorBaseUrl: http://localhost
+livesystementryBaseUrl: http://gep-dev-system-entry.gep-dev-201902.svc.cluster.local
+livegeneratorBaseUrl: http://gep-dev-generator.gep-dev-201902.svc.cluster.local
+localname: development
