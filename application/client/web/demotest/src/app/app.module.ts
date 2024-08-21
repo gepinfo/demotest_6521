@@ -1,10 +1,3 @@
-import { SefscreenModule } from './sefscreen/sefscreen.module';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
-                import * as AllIcons from '@ant-design/icons-angular/icons';
-                import { IconDefinition } from '@ant-design/icons-angular';
-                import { NZ_I18N, en_US } from 'ng-zorro-antd/i18n';
-                import { NZ_ICONS } from 'ng-zorro-antd/icon';
 import { VaultadminModule } from './vaultadmin/vaultadmin.module';
 import { UserModule } from './user/user.module';
 import { ManagecontrolModule } from './managecontrol/managecontrol.module';
@@ -14,6 +7,13 @@ import { AuthorizationModule } from './authorization/authorization.module';
 import { HomeModule } from './home/home.module';
 import { SignupModule } from './signup/signup.module';
 import { LoginModule } from './login/login.module';
+import { SefscreenModule } from './sefscreen/sefscreen.module';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+                import * as AllIcons from '@ant-design/icons-angular/icons';
+                import { IconDefinition } from '@ant-design/icons-angular';
+                import { NZ_I18N, en_US } from 'ng-zorro-antd/i18n';
+                import { NZ_ICONS } from 'ng-zorro-antd/icon';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
@@ -34,21 +34,24 @@ const packageNgzorro = [ { provide: NZ_ICONS, useValue: icons }, { provide: NZ_I
 
 @NgModule({
   declarations: [
-        AppComponent
+            AppComponent
 ],
   imports: [
-  SefscreenModule,
-FormsModule,
-HttpClientModule,
 VaultadminModule,
 UserModule,
-ManagecontrolModule,
 ManageusersModule,
-ManagerolesModule,
 AuthorizationModule,
 HomeModule,
 SignupModule,
 LoginModule,
+  SefscreenModule,
+FormsModule,
+HttpClientModule,
+VaultadminModule,
+ManagecontrolModule,
+ManageusersModule,
+ManagerolesModule,
+AuthorizationModule,
 ToastrModule.forRoot(),
 TemplateModule,
 FooterModule,
@@ -57,10 +60,10 @@ TranslatorModule,
 AppRoutingModule,
 BrowserAnimationsModule,
       BrowserModule,
-AdminModule
+  AdminModule
 ],
   providers: [
-    	SharedService,
+      	SharedService,
 ...packageNgzorro
 
   ],

@@ -57,14 +57,14 @@ service:
   systementry: 
     name: systementry
     type: NodePort
-    port: 8113
-    targetPort: 8113
+    port: 8115
+    targetPort: 8115
 
   employee: 
     name: employee
     type: NodePort
-    port: 8114
-    targetPort: 8114
+    port: 8116
+    targetPort: 8116
 
 
 deployment:

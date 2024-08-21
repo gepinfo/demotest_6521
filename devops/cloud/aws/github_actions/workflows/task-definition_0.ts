@@ -12,9 +12,9 @@ module.exports = {
             "essential": true,
             "portMappings": [
                 {
-                    "containerPort": "8114",
+                    "containerPort": "8116",
                     "protocol": "tcp",
-                    "hostPort": "8114"
+                    "hostPort": "8116"
                 }
             ],
             "environmentFiles": null,

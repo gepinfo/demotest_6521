@@ -251,7 +251,7 @@ services:
     image: systementry-6521
     container_name: systementry-6521
     ports: 
-      - 8113:8113
+      - 8115:8115
     env_file: .env
     depends_on:
       - mongo
@@ -272,7 +272,7 @@ services:
     image: employee-6521
     container_name: employee-6521
     ports: 
-      - 8114:8114
+      - 8116:8116
     env_file: .env
     depends_on:
       - mongo
