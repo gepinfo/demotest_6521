@@ -25,6 +25,16 @@ public class EmpaController {
     }
 
 
+    @GetMapping("/{id}")
+    public ResponseEntity<EmpaDto> getEntityById(@PathVariable String id) {
+       return ResponseEntity.ok(empaService.getEntityById(id));
+    }
+
+
+    @GetMapping
+     public ResponseEntity<List<EmpaDto>> getAllValues() {
+       return ResponseEntity.ok(empaService.getAllValues());
+     }
 
 
     @PutMapping
@@ -44,5 +54,10 @@ public class EmpaController {
        return ResponseEntity.ok(empaService.search(allParams));
     }
     
+
+    @GetMapping("/searchUpdate")
+    public ResponseEntity<EmpaDto> searchForUpdate(@RequestBody EmpaDto empaDto) {
+       return ResponseEntity.ok(empaService.update(empaDto));
+    }
 
 }

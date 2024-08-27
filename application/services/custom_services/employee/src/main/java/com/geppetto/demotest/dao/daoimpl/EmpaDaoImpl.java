@@ -22,6 +22,16 @@ public class EmpaDaoImpl implements EmpaDao{
     }
 
 
+    @Override
+    public Optional<Empa> getEntityById(String id) {
+      return empaRepository.findById(id);
+    }
+
+
+    @Override
+    public List<Empa> getAllValues() {
+      return empaRepository.findAll();
+    }
 
 
     @Override

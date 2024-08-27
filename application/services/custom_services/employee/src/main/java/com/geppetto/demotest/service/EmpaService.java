@@ -9,6 +9,10 @@ public interface EmpaService {
     EmpaDto create(EmpaDto empaDto);
 
 
+    EmpaDto getEntityById(String id);
+
+
+    List<EmpaDto> getAllValues();
 
 
     EmpaDto update(EmpaDto empaDto);

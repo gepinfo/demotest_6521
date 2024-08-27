@@ -34,7 +34,7 @@ const packageNgzorro = [ { provide: NZ_ICONS, useValue: icons }, { provide: NZ_I
 
 @NgModule({
   declarations: [
-            AppComponent
+                AppComponent
 ],
   imports: [
 VaultadminModule,
@@ -44,6 +44,7 @@ AuthorizationModule,
 HomeModule,
 SignupModule,
 LoginModule,
+ManageusersModule,
   SefscreenModule,
 FormsModule,
 HttpClientModule,
@@ -60,10 +61,10 @@ TranslatorModule,
 AppRoutingModule,
 BrowserAnimationsModule,
       BrowserModule,
-  AdminModule
+    AdminModule
 ],
   providers: [
-      	SharedService,
+        	SharedService,
 ...packageNgzorro
 
   ],

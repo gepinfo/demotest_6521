@@ -10,6 +10,10 @@ public interface EmpaDao {
     Empa create(Empa empa);
 
 
+    Optional<Empa> getEntityById(String id);
+
+
+    List<Empa> getAllValues();
 
 
     Optional<Empa> update(String id);

@@ -37,6 +37,31 @@ public class EmpaServiceImpl implements EmpaService{
     }
 
 
+    @Override
+    public EmpaDto getEntityById(String id) {
+    EmpaDto empaDto = new EmpaDto();
+    Optional<Empa> result = empaDao.getEntityById(id);
+        if (result.isPresent()) {
+            BeanUtils.copyProperties(result.get(), empaDto);
+        } else {
+            throw new EntityNotFoundException("Data not found for ID: " + id);
+        }
+        return empaDto;
+    }
+
+
+    @Override
+    public List<EmpaDto> getAllValues() {
+        List<Empa> empaEntities = empaDao.getAllValues();
+        List<EmpaDto> empaDtoList = new ArrayList<>();
+        for (Empa empaEntity : empaEntities) {
+            EmpaDto empaDto = new EmpaDto();
+            BeanUtils.copyProperties(empaEntity, empaDto);
+            empaDtoList.add(empaDto);
+        }
+        return empaDtoList;
+    }
+
 
 
     @Override
